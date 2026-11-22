@@ -2,6 +2,7 @@ using AutenticacionSegura.Datos.Contexto;   // AppDbContext
 using AutenticacionSegura.Datos.Entidades;  // Usuario
 using Microsoft.AspNetCore.Identity;        // IdentityRole, AddIdentity
 using Microsoft.EntityFrameworkCore;        // UseSqlServer
+using AutenticacionSegura.Datos.Inicializacion;  // InicializadorDatos (seeding)
 
 // Crea el "constructor" de la aplicación: aquí se registran los servicios
 // (inyección de dependencias) antes de arrancar el servidor.
@@ -59,5 +60,11 @@ app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+// SEEDING: al arrancar, crea los roles y el administrador inicial si no existen.
+// El correo y la clave se leen de User Secrets ("SemillaAdmin"), nunca del código.
+await InicializadorDatos.EjecutarAsync(
+    app.Services,
+    builder.Configuration["SemillaAdmin:Correo"],
+    builder.Configuration["SemillaAdmin:Clave"]);
 
 app.Run();  // Inicia el servidor web
