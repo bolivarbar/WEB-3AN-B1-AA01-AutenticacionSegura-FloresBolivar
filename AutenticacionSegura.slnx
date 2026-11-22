@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="AutenticacionSegura.Datos/AutenticacionSegura.Datos.csproj" />
+  <Project Path="AutenticacionSegura.Negocio/AutenticacionSegura.Negocio.csproj" />
+  <Project Path="AutenticacionSegura.Web/AutenticacionSegura.Web.csproj" />
+</Solution>
