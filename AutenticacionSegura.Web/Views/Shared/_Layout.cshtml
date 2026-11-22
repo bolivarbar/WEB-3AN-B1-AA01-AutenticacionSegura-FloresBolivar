@@ -26,6 +26,9 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+						<li class="nav-item">
+							<a class="nav-link text-dark" asp-controller="Cuenta" asp-action="Registro">Registrarse</a>
+						</li>
                     </ul>
                 </div>
             </div>
@@ -33,13 +36,17 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+			@if (TempData["Mensaje"] is string mensaje)
+			{
+			<div class="alert alert-success">@mensaje</div>
+			}
+			@RenderBody()
+		</main>
     </div>
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2026 - AutenticacionSegura.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+			&#169; 2026 - AutenticacionSegura.Web - - AutenticacionSegura.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

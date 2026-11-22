@@ -1,0 +1,49 @@
+@model RegistroViewModel
+@{
+    ViewData["Title"] = "Crear cuenta";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <h1 class="h3 mb-3">Crear cuenta</h1>
+
+        @* El form con asp-action agrega solo el token antiforgery oculto *@
+        <form asp-action="Registro" method="post" novalidate>
+
+            @* Muestra los errores generales (correo duplicado, contraseña débil, etc.) *@
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="NombreCompleto" class="form-label"></label>
+                <input asp-for="NombreCompleto" class="form-control" autocomplete="name" />
+                <span asp-validation-for="NombreCompleto" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Correo" class="form-label"></label>
+                <input asp-for="Correo" class="form-control" autocomplete="email" />
+                <span asp-validation-for="Correo" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Clave" class="form-label"></label>
+                <input asp-for="Clave" class="form-control" autocomplete="new-password" />
+                <span asp-validation-for="Clave" class="text-danger"></span>
+                <div class="form-text">Mínimo 8 caracteres, con mayúscula, minúscula, número y símbolo.</div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ConfirmarClave" class="form-label"></label>
+                <input asp-for="ConfirmarClave" class="form-control" autocomplete="new-password" />
+                <span asp-validation-for="ConfirmarClave" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Registrarme</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @* Validación en el navegador (jQuery Validation); la del servidor sigue activa *@
+    <partial name="_ValidationScriptsPartial" />
+}
