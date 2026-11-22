@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AutenticacionSegura.Negocio\AutenticacionSegura.Negocio.csproj" />
+    <ProjectReference Include="..\AutenticacionSegura.Datos\AutenticacionSegura.Datos.csproj" />
   </ItemGroup>
 
   <ItemGroup>
