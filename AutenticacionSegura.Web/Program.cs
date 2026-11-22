@@ -3,6 +3,8 @@ using AutenticacionSegura.Datos.Entidades;  // Usuario
 using Microsoft.AspNetCore.Identity;        // IdentityRole, AddIdentity
 using Microsoft.EntityFrameworkCore;        // UseSqlServer
 using AutenticacionSegura.Datos.Inicializacion;  // InicializadorDatos (seeding)
+using AutenticacionSegura.Datos.Identidad;    // DescriptorErroresIdentity
+using AutenticacionSegura.Negocio.Servicios;  // IServicioAutenticacion
 
 // Crea el "constructor" de la aplicación: aquí se registran los servicios
 // (inyección de dependencias) antes de arrancar el servidor.
@@ -29,10 +31,25 @@ builder.Services.AddDbContext<AppDbContext>(opciones =>
 //  - AddEntityFrameworkStores: guarda usuarios y roles en SQL Server mediante AppDbContext
 //  - AddDefaultTokenProviders: genera los tokens (por ejemplo, para recuperar contraseña)
 // Las reglas de contraseña, bloqueo y cookies se configuran en pasos posteriores.
+// Registra ASP.NET Core Identity con la política de seguridad de la actividad.
 builder.Services
-    .AddIdentity<Usuario, IdentityRole>()
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+    .AddIdentity<Usuario, IdentityRole>(opciones =>
+    {
+        // Política de contraseña razonable
+        opciones.Password.RequiredLength = 8;          // mínimo 8 caracteres
+        opciones.Password.RequireDigit = true;         // al menos un número
+        opciones.Password.RequireLowercase = true;     // al menos una minúscula
+        opciones.Password.RequireUppercase = true;     // al menos una mayúscula
+        opciones.Password.RequireNonAlphanumeric = true; // al menos un símbolo
+
+        // Correo único: no se permiten dos cuentas con el mismo correo
+        opciones.User.RequireUniqueEmail = true;
+    })
+    .AddEntityFrameworkStores<AppDbContext>()      // guarda usuarios y roles en SQL Server
+    .AddDefaultTokenProviders()                    // tokens (recuperar contraseña)
+    .AddErrorDescriber<DescriptorErroresIdentity>(); // mensajes de error en español
+// Registra el servicio de la capa de Negocio. "Scoped" = una instancia por petición web.
+builder.Services.AddScoped<IServicioAutenticacion, ServicioAutenticacion>();
 
 // Construye la aplicación con todo lo registrado arriba.
 var app = builder.Build();
