@@ -5,23 +5,24 @@ using Microsoft.AspNetCore.Identity;
 namespace AutenticacionSegura.Negocio.Servicios;
 
 /// <summary>
-/// Implementación de las reglas de negocio de autenticación.
-/// Usa UserManager (ASP.NET Core Identity) para crear usuarios y asignar roles;
-/// no se implementa ningún algoritmo criptográfico propio.
+/// Reglas de negocio de autenticación. Usa UserManager y SignInManager de
+/// ASP.NET Core Identity; no se implementa ningún algoritmo criptográfico propio.
 /// </summary>
 public class ServicioAutenticacion : IServicioAutenticacion
 {
     private readonly UserManager<Usuario> _gestorUsuarios;
+    private readonly SignInManager<Usuario> _gestorSesion;
 
-    // El UserManager llega por inyección de dependencias (lo registra AddIdentity).
-    public ServicioAutenticacion(UserManager<Usuario> gestorUsuarios)
+    // Ambos gestores llegan por inyección de dependencias (los registra AddIdentity).
+    public ServicioAutenticacion(UserManager<Usuario> gestorUsuarios, SignInManager<Usuario> gestorSesion)
     {
         _gestorUsuarios = gestorUsuarios;
+        _gestorSesion = gestorSesion;
     }
 
     public async Task<ResultadoOperacion> RegistrarAsync(string nombreCompleto, string correo, string clave)
     {
-        // 1. Reglas propias: campos obligatorios (validación del lado del servidor).
+        // 1. Campos obligatorios (validación del lado del servidor).
         if (string.IsNullOrWhiteSpace(nombreCompleto))
             return ResultadoOperacion.Fallo("El nombre completo es obligatorio.");
 
@@ -33,7 +34,7 @@ public class ServicioAutenticacion : IServicioAutenticacion
 
         correo = correo.Trim();
 
-        // 2. Correo único: si ya existe, se rechaza el registro.
+        // 2. Correo único.
         if (await _gestorUsuarios.FindByEmailAsync(correo) is not null)
             return ResultadoOperacion.Fallo("Ese correo ya está registrado.");
 
@@ -46,8 +47,7 @@ public class ServicioAutenticacion : IServicioAutenticacion
             Activo = true
         };
 
-        // 4. CreateAsync valida la política de contraseña, comprueba duplicados
-        // y guarda la contraseña con hash (PasswordHasher de Identity).
+        // 4. CreateAsync valida la política de contraseña y la guarda con hash.
         var resultado = await _gestorUsuarios.CreateAsync(usuario, clave);
         if (!resultado.Succeeded)
             return ResultadoOperacion.Fallo(resultado.Errors.Select(e => e.Description));
@@ -56,12 +56,50 @@ public class ServicioAutenticacion : IServicioAutenticacion
         var rolAsignado = await _gestorUsuarios.AddToRoleAsync(usuario, RolesSistema.Cliente);
         if (!rolAsignado.Succeeded)
         {
-            // Si no se pudo asignar el rol, se elimina el usuario para no dejar
-            // una cuenta sin rol a medias.
             await _gestorUsuarios.DeleteAsync(usuario);
             return ResultadoOperacion.Fallo("No se pudo completar el registro. Intente nuevamente.");
         }
 
         return ResultadoOperacion.Ok();
+    }
+
+    public async Task<ResultadoOperacion> IniciarSesionAsync(string correo, string clave, bool recordarme)
+    {
+        // Mensaje único para todos los fallos de credenciales: así nadie puede
+        // averiguar qué correos existen en el sistema.
+        const string mensajeGenerico = "Correo o contraseña incorrectos.";
+
+        if (string.IsNullOrWhiteSpace(correo) || string.IsNullOrWhiteSpace(clave))
+            return ResultadoOperacion.Fallo(mensajeGenerico);
+
+        var usuario = await _gestorUsuarios.FindByEmailAsync(correo.Trim());
+        if (usuario is null)
+            return ResultadoOperacion.Fallo(mensajeGenerico);
+
+        // Verifica la contraseña contra el hash. lockoutOnFailure: true suma un intento
+        // fallido y, al llegar al máximo configurado, bloquea la cuenta temporalmente.
+        var resultado = await _gestorSesion.CheckPasswordSignInAsync(usuario, clave, lockoutOnFailure: true);
+
+        if (resultado.IsLockedOut)
+            return ResultadoOperacion.Fallo("Demasiados intentos fallidos. La cuenta está bloqueada temporalmente; intente de nuevo más tarde.");
+
+        if (!resultado.Succeeded)
+            return ResultadoOperacion.Fallo(mensajeGenerico);
+
+        // Cuenta deshabilitada por un administrador: no entra (mismo mensaje genérico).
+        if (!usuario.Activo)
+            return ResultadoOperacion.Fallo(mensajeGenerico);
+
+        // Crea la cookie de autenticación. isPersistent = "Recordarme":
+        //  - false: cookie de sesión (se borra al cerrar el navegador)
+        //  - true : cookie persistente con la vigencia configurada
+        await _gestorSesion.SignInAsync(usuario, isPersistent: recordarme);
+        return ResultadoOperacion.Ok();
+    }
+
+    public async Task CerrarSesionAsync()
+    {
+        // Elimina la cookie de autenticación: sin ella no se puede seguir accediendo.
+        await _gestorSesion.SignOutAsync();
     }
 }

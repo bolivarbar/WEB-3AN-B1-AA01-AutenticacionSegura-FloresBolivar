@@ -41,15 +41,49 @@ builder.Services
         opciones.Password.RequireLowercase = true;     // al menos una minúscula
         opciones.Password.RequireUppercase = true;     // al menos una mayúscula
         opciones.Password.RequireNonAlphanumeric = true; // al menos un símbolo
+       
 
         // Correo único: no se permiten dos cuentas con el mismo correo
         opciones.User.RequireUniqueEmail = true;
+
+        // Bloqueo temporal por intentos fallidos de inicio de sesión
+        opciones.Lockout.MaxFailedAccessAttempts = 5;                       // 5 intentos fallidos...
+        opciones.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);  // ...bloquean la cuenta 5 minutos
+        opciones.Lockout.AllowedForNewUsers = true;                         // aplica también a cuentas nuevas
     })
+
     .AddEntityFrameworkStores<AppDbContext>()      // guarda usuarios y roles en SQL Server
     .AddDefaultTokenProviders()                    // tokens (recuperar contraseña)
     .AddErrorDescriber<DescriptorErroresIdentity>(); // mensajes de error en español
 // Registra el servicio de la capa de Negocio. "Scoped" = una instancia por petición web.
 builder.Services.AddScoped<IServicioAutenticacion, ServicioAutenticacion>();
+
+// Configuración de la cookie de autenticación.
+// La vigencia (en minutos) se lee de appsettings.json; si falta, usa 7 días.
+var vigenciaCookieMinutos = builder.Configuration.GetValue("Autenticacion:VigenciaCookieMinutos", 10080);
+
+builder.Services.ConfigureApplicationCookie(opciones =>
+{
+    opciones.Cookie.Name = "AutenticacionSegura.Auth";
+    opciones.Cookie.HttpOnly = true;                          // JavaScript no puede leer la cookie
+    opciones.Cookie.SecurePolicy = CookieSecurePolicy.Always; // solo viaja por HTTPS
+    opciones.Cookie.SameSite = SameSiteMode.Lax;              // no se envía en peticiones desde otros sitios (protege contra CSRF)
+
+    opciones.ExpireTimeSpan = TimeSpan.FromMinutes(vigenciaCookieMinutos);
+    opciones.SlidingExpiration = false;                       // vencimiento fijo, fácil de comprobar en las pruebas
+
+    opciones.LoginPath = "/Cuenta/Login";                     // a dónde redirige si no hay sesión
+    opciones.AccessDeniedPath = "/Cuenta/AccesoDenegado";     // a dónde redirige si no tiene permiso
+    opciones.LogoutPath = "/Cuenta/Logout";
+});
+
+// La cookie del token antiforgery (formularios POST) con protecciones similares.
+builder.Services.AddAntiforgery(opciones =>
+{
+    opciones.Cookie.HttpOnly = true;
+    opciones.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    opciones.Cookie.SameSite = SameSiteMode.Strict;
+});
 
 // Construye la aplicación con todo lo registrado arriba.
 var app = builder.Build();
