@@ -1,0 +1,31 @@
+@* Área personal (GET /Cuenta/AreaPersonal).
+   Solo se puede abrir con sesión iniciada: la protege [Authorize] en el controlador,
+   no esta vista. Aquí se muestra quién inició sesión y su rol. *@
+@{
+    ViewData["Title"] = "Área personal";
+}
+
+<h1 class="h3 mb-3">Área personal</h1>
+
+<div class="alert alert-info">
+    @* User es la identidad que Identity reconstruye desde la cookie de autenticación en
+       cada petición. Name es el nombre de usuario, que en este sistema es el correo. *@
+    Sesión iniciada como: <strong>@User.Identity?.Name</strong>
+</div>
+
+<p>
+    Rol:
+    @* IsInRole consulta los roles guardados en la cookie. *@
+    @if (User.IsInRole("Administrador"))
+    {
+        <span class="badge bg-danger">Administrador</span>
+    }
+    else if (User.IsInRole("Cliente"))
+    {
+        <span class="badge bg-primary">Cliente</span>
+    }
+</p>
+
+<p class="text-muted">
+    Esta página solo es visible para usuarios autenticados.
+</p>

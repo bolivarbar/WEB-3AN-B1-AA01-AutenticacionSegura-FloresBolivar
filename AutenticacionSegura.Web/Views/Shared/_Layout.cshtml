@@ -26,9 +26,32 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-controller="Cuenta" asp-action="Registro">Registrarse</a>
-						</li>
+						@* El menú cambia según haya o no una sesión iniciada.
+   User.Identity.IsAuthenticated es true cuando la cookie de autenticación es válida.
+   OJO: ocultar enlaces es solo comodidad visual; la seguridad real está en
+   [Authorize] en el servidor. *@
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-controller="Cuenta" asp-action="AreaPersonal">Área personal</a>
+    </li>
+    <li class="nav-item">
+        @* Cerrar sesión es un formulario POST: el form tag helper agrega el token
+           antiforgery, que CuentaController.Logout verifica. *@
+        <form asp-controller="Cuenta" asp-action="Logout" method="post" class="d-inline">
+            <button type="submit" class="nav-link btn btn-link text-dark">Cerrar sesión (@User.Identity.Name)</button>
+        </form>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-controller="Cuenta" asp-action="Registro">Registrarse</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-controller="Cuenta" asp-action="Login">Iniciar sesión</a>
+    </li>
+}
                     </ul>
                 </div>
             </div>

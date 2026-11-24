@@ -1,0 +1,63 @@
+@* Vista del formulario de inicio de sesión (GET /Cuenta/Login).
+   El modelo es LoginViewModel: trae el correo, la contraseña, "Recordarme" y la UrlRetorno. *@
+@model LoginViewModel
+@{
+    // Título de la pestaña del navegador (lo usa _Layout.cshtml)
+    ViewData["Title"] = "Iniciar sesión";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <h1 class="h3 mb-3">Iniciar sesión</h1>
+
+        @* asp-action="Login" envía el formulario por POST a CuentaController.Login.
+           Al usar method="post" con el form tag helper, ASP.NET agrega solo un token
+           antiforgery oculto, que el controlador verifica con [ValidateAntiForgeryToken].
+           novalidate evita los mensajes nativos del navegador y deja que actúe la
+           validación unobtrusive de jQuery (y, siempre, la del servidor). *@
+        <form asp-action="Login" method="post" novalidate>
+
+            @* Muestra los errores generales, como "Correo o contraseña incorrectos."
+               o el aviso de cuenta bloqueada. ModelOnly = solo los que no son de un campo. *@
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            @* Campo oculto: guarda la página protegida a la que se intentó entrar, para
+               volver a ella después de iniciar sesión (el controlador comprueba que sea local). *@
+            <input asp-for="UrlRetorno" type="hidden" />
+
+            <div class="mb-3">
+                @* asp-for genera el label, el id, el name y las reglas de validación
+                   a partir de las anotaciones de LoginViewModel. *@
+                <label asp-for="Correo" class="form-label"></label>
+                <input asp-for="Correo" class="form-control" autocomplete="username" />
+                <span asp-validation-for="Correo" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                @* Es type="password" por el atributo [DataType(Password)]: el navegador
+                   oculta lo escrito y el campo nunca se vuelve a llenar con el valor enviado. *@
+                <label asp-for="Clave" class="form-label"></label>
+                <input asp-for="Clave" class="form-control" autocomplete="current-password" />
+                <span asp-validation-for="Clave" class="text-danger"></span>
+            </div>
+
+            <div class="form-check mb-3">
+                @* "Recordarme": si se marca, la cookie de autenticación es persistente. *@
+                <input asp-for="Recordarme" class="form-check-input" />
+                <label asp-for="Recordarme" class="form-check-label"></label>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Entrar</button>
+        </form>
+
+        <p class="mt-3 text-center">
+            ¿No tiene cuenta?
+            <a asp-controller="Cuenta" asp-action="Registro">Regístrese aquí</a>
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    @* Validación en el navegador (jQuery Validation); la del servidor sigue activa siempre. *@
+    <partial name="_ValidationScriptsPartial" />
+}

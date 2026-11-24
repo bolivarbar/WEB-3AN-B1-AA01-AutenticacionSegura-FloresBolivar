@@ -1,0 +1,14 @@
+@* Página de "Acceso denegado" (GET /Cuenta/AccesoDenegado).
+   El sistema de cookies redirige aquí a un usuario con sesión iniciada que intenta
+   entrar a algo para lo que no tiene permiso. El controlador responde con el
+   código HTTP 403, así que la restricción ocurre en el SERVIDOR. *@
+@{
+    ViewData["Title"] = "Acceso denegado";
+}
+
+<div class="alert alert-danger">
+    <h1 class="h4">Acceso denegado</h1>
+    <p class="mb-0">No tiene permiso para ver esta página.</p>
+</div>
+
+<a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Volver al inicio</a>
