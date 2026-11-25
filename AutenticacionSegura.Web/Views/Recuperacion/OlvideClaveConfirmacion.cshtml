@@ -1,0 +1,14 @@
+@* Pantalla de confirmación tras pedir el enlace (OlvideClaveConfirmacion). *@
+@{
+    ViewData["Title"] = "Revise su correo";
+}
+
+<h1>Revise su correo</h1>
+
+@* Mensaje genérico: es el mismo exista o no el correo, para no revelar qué cuentas existen. *@
+<div class="alert alert-info">
+    Si el correo está registrado, le enviamos un enlace para restablecer su contraseña.
+    Revise también la carpeta de spam. El enlace vence en pocos minutos y solo puede usarse una vez.
+</div>
+
+<a asp-controller="Cuenta" asp-action="Login">Volver a iniciar sesión</a>

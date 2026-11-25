@@ -1,0 +1,39 @@
+@* Formulario de nueva contraseña (RestablecerClave): se abre desde el enlace del correo. *@
+@model AutenticacionSegura.Web.Models.RestablecerClaveViewModel
+@{
+    ViewData["Title"] = "Nueva contraseña";
+}
+
+<h1>Crear nueva contraseña</h1>
+<p class="text-muted">Mínimo 8 caracteres, con mayúscula, minúscula, número y un símbolo.</p>
+
+<div class="row">
+    <div class="col-md-5">
+        <form asp-controller="Recuperacion" asp-action="RestablecerClave" method="post">
+            @* Aquí se muestran los errores del token (inválido, vencido, usado) y de la política de contraseñas. *@
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            @* Campos ocultos: viajan desde el enlace del correo hasta el servidor. *@
+            <input type="hidden" asp-for="Correo" />
+            <input type="hidden" asp-for="Token" />
+
+            <div class="mb-3">
+                <label asp-for="Clave" class="form-label"></label>
+                <input asp-for="Clave" class="form-control" autocomplete="new-password" />
+                <span asp-validation-for="Clave" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ConfirmarClave" class="form-label"></label>
+                <input asp-for="ConfirmarClave" class="form-control" autocomplete="new-password" />
+                <span asp-validation-for="ConfirmarClave" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Cambiar contraseña</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

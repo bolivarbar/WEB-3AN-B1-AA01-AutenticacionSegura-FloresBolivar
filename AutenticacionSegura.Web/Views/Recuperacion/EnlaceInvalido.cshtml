@@ -1,0 +1,12 @@
+@* Pantalla para enlaces de recuperación incompletos o manipulados (EnlaceInvalido). *@
+@{
+    ViewData["Title"] = "Enlace no válido";
+}
+
+<h1>Enlace no válido</h1>
+
+<div class="alert alert-danger">
+    El enlace no es válido o está incompleto. Solicite uno nuevo.
+</div>
+
+<a asp-controller="Recuperacion" asp-action="OlvideClave">Solicitar un nuevo enlace</a>
