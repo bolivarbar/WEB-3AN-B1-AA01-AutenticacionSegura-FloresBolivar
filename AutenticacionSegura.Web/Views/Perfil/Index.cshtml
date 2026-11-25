@@ -1,0 +1,44 @@
+@* ============================================================
+   VISTA: Perfil/Index  ->  FORMULARIO "EDITAR PERFIL"
+   Muestra los datos del usuario (solo lectura) y permite cambiar
+   su nombre completo. Protegida por [Authorize] en PerfilController.
+   El formulario incluye el token antifalsificación automáticamente
+   (el form tag helper lo agrega al usar method="post").
+   ============================================================ *@
+@model AutenticacionSegura.Web.Models.EditarPerfilViewModel
+
+@{
+    ViewData["Title"] = "Mi perfil";
+}
+
+<h1>Mi perfil</h1>
+
+@* Datos informativos: no se pueden editar aquí. *@
+<dl class="row">
+    <dt class="col-sm-3">Correo electrónico</dt>
+    <dd class="col-sm-9">@Model.Correo</dd>
+
+    <dt class="col-sm-3">Rol</dt>
+    <dd class="col-sm-9"><span class="badge bg-secondary">@Model.Rol</span></dd>
+
+    <dt class="col-sm-3">Fecha de registro</dt>
+    <dd class="col-sm-9">@Model.FechaRegistro.ToString("dd/MM/yyyy HH:mm") (UTC)</dd>
+</dl>
+
+@* Formulario "Editar perfil": solo se envía el nombre completo. *@
+<form asp-action="Index" asp-controller="Perfil" method="post" class="col-md-6">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="NombreCompleto" class="form-label"></label>
+        <input asp-for="NombreCompleto" class="form-control" autocomplete="name" />
+        <span asp-validation-for="NombreCompleto" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+    <a asp-action="CambiarClave" class="btn btn-outline-secondary">Cambiar contraseña</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

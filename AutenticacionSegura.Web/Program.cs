@@ -23,6 +23,8 @@ builder.Services.Configure<ConfiguracionSmtp>(
 builder.Services.AddScoped<IEmailService, ServicioCorreoSmtp>();
 // Servicio del flujo "Olvidé mi contraseña" (solicitar enlace y restablecer).
 builder.Services.AddScoped<IServicioRecuperacion, ServicioRecuperacion>();
+// Servicio de perfil del usuario (ver datos, editar nombre, cambiar contraseña).
+builder.Services.AddScoped<IServicioPerfil, ServicioPerfil>();
 // --- Vigencia del token de recuperación de contraseña ---
 // Lee los minutos desde appsettings.json (30 por defecto). Pasado ese tiempo,
 // el enlace del correo deja de funcionar. Además, Identity invalida el token
