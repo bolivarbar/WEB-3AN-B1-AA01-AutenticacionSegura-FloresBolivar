@@ -1,3 +1,4 @@
+using AutenticacionSegura.Negocio.Correo;
 using AutenticacionSegura.Datos.Contexto;   // AppDbContext
 using AutenticacionSegura.Datos.Entidades;  // Usuario
 using Microsoft.AspNetCore.Identity;        // IdentityRole, AddIdentity
@@ -12,6 +13,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Habilita controladores y vistas Razor (la capa de Presentación MVC).
 builder.Services.AddControllersWithViews();
+// --- Servicio de correo (SMTP) ---
+// Une la sección "Smtp" de appsettings.json (servidor, puerto, remitente)
+// con User Secrets (Smtp:Usuario y Smtp:Clave) en un objeto ConfiguracionSmtp.
+builder.Services.Configure<ConfiguracionSmtp>(
+    builder.Configuration.GetSection(ConfiguracionSmtp.NombreSeccion));
+
+// Cuando algún servicio pida IEmailService, se le entrega ServicioCorreoSmtp.
+builder.Services.AddScoped<IEmailService, ServicioCorreoSmtp>();
 
 // Lee la cadena de conexión desde appsettings.json.
 // Si no existe, detiene el arranque con un mensaje claro en lugar de fallar después.
