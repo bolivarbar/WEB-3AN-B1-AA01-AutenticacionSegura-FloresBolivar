@@ -1,0 +1,81 @@
+@* ============================================================
+   VISTA: Administracion/Index  ->  LISTADO DE USUARIOS (solo Administrador)
+   Cada fila tiene dos formularios POST con token antifalsificación (lo agrega
+   el form tag helper): "Cambiar rol" y "Habilitar / Deshabilitar".
+   La decisión de si se permite o no la operación NO se toma aquí: la toma el
+   servidor (ServicioAdministracion) y el resultado vuelve como aviso.
+   ============================================================ *@
+@using AutenticacionSegura.Negocio.Modelos
+@model IReadOnlyList<UsuarioResumen>
+
+@{
+    ViewData["Title"] = "Administración de usuarios";
+}
+
+<h1>Administración de usuarios</h1>
+<p class="text-muted">Total de usuarios: @Model.Count</p>
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Correo</th>
+                <th>Nombre</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Registro (UTC)</th>
+                <th>Cambiar rol</th>
+                <th>Cuenta</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var usuario in Model)
+            {
+                <tr>
+                    <td>@usuario.Correo</td>
+                    <td>@usuario.NombreCompleto</td>
+                    <td><span class="badge bg-secondary">@usuario.Rol</span></td>
+                    <td>
+                        @if (usuario.Activo)
+                        {
+                            <span class="badge bg-success">Activa</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Deshabilitada</span>
+                        }
+                    </td>
+                    <td>@usuario.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</td>
+
+                    @* Formulario "Cambiar rol": envía el id del usuario y el rol elegido. *@
+                    <td>
+                        <form asp-controller="Administracion" asp-action="CambiarRol" method="post" class="d-flex gap-1">
+                            <input type="hidden" name="id" value="@usuario.Id" />
+                            <select name="rol" class="form-select form-select-sm">
+                                <option value="Cliente" selected="@(usuario.Rol == "Cliente")">Cliente</option>
+                                <option value="Administrador" selected="@(usuario.Rol == "Administrador")">Administrador</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Guardar</button>
+                        </form>
+                    </td>
+
+                    @* Formulario "Habilitar / Deshabilitar": envía el id y el estado deseado. *@
+                    <td>
+                        <form asp-controller="Administracion" asp-action="CambiarEstado" method="post">
+                            <input type="hidden" name="id" value="@usuario.Id" />
+                            <input type="hidden" name="activo" value="@(usuario.Activo ? "false" : "true")" />
+                            @if (usuario.Activo)
+                            {
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Deshabilitar</button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn btn-sm btn-outline-success">Habilitar</button>
+                            }
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

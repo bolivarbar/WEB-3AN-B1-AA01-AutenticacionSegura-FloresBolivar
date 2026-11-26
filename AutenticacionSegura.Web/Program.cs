@@ -25,6 +25,14 @@ builder.Services.AddScoped<IEmailService, ServicioCorreoSmtp>();
 builder.Services.AddScoped<IServicioRecuperacion, ServicioRecuperacion>();
 // Servicio de perfil del usuario (ver datos, editar nombre, cambiar contraseña).
 builder.Services.AddScoped<IServicioPerfil, ServicioPerfil>();
+// Servicio de administración de usuarios (listar, cambiar rol, habilitar/deshabilitar).
+builder.Services.AddScoped<IServicioAdministracion, ServicioAdministracion>();
+
+// Por defecto Identity revalida el "sello de seguridad" de la cookie cada 30 minutos.
+// Con TimeSpan.Zero se revalida en CADA petición: si un administrador deshabilita una
+// cuenta o cambia un rol, la cookie que el usuario ya tenía deja de valer de inmediato.
+builder.Services.Configure<SecurityStampValidatorOptions>(opciones =>
+    opciones.ValidationInterval = TimeSpan.Zero);
 // --- Vigencia del token de recuperación de contraseña ---
 // Lee los minutos desde appsettings.json (30 por defecto). Pasado ese tiempo,
 // el enlace del correo deja de funcionar. Además, Identity invalida el token
