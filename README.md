@@ -129,6 +129,11 @@ Para probar la recuperación de contraseña se necesita registrar una cuenta con
 | 13 | Ventana de incógnito no hereda la sesión | Correcto |
 | 14 | "Recordarme" (cookie persistente) y cierre de sesión | Correcto |
 
+## Desarrollo local y despliegue público
+
+- **Local (esta entrega):** la aplicación corre en `https://localhost:7079`, con SQL Server local y secretos en User Secrets. Los enlaces de recuperación que llegan por correo apuntan a `localhost`, por lo que solo funcionan en el equipo donde se ejecuta la aplicación.
+- **Despliegue público:** requeriría un servidor con dominio y HTTPS propios, una base de datos accesible desde ese servidor, los secretos como variables de entorno o un gestor de secretos del proveedor (no User Secrets), y que el enlace de recuperación use el dominio público para que funcione desde cualquier equipo.
+
 ## Uso de inteligencia artificial
 
 El detalle del uso de IA (prompts y fuentes) se documenta en el PDF entregado junto con este repositorio.
